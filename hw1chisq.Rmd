@@ -1,0 +1,163 @@
+---
+title: "hw1chisq"
+output: html_document
+---
+
+#question 1
+a) What does the normal quantile plot indicate about the normality of returns?
+b) The table groups all returns that are less than −0.03 and more than 0.03.
+Why not use more categories to separate very high or low returns?
+c) Compute the chi-squared test of goodness of fit and its p-value.
+d) Does the chi-squared test agree with the normal quantile plot?
+e) What’s the advantage of using a normal quantile plot to check for normality?
+The advantage of using the chi-squared test?
+
+
+$$ H_0: Stock\ Returns\ are\ normally\ distributed\ over\ the\ intervals.\\ 
+H_1: Stock\ Returns\ are\ not\ normally\ distributed\ over\ the\ intervals. $$
+
+OR
+
+$$
+
+H_0 :\ P_{1} = 0.01988, P_{2} = 0.06198, P_{3} = 0.15111, P_{4} = 0.24091, P_{5} = 0.25121, P_{6} = 0.17136, P_{7} = 0.07644, P_{8} = 0.02711 \\
+H_1 : At\ least\ one\ of\ the\ probabilities\ are\ different\ from\ the\ specified\ above/\ expected\ probabilities.
+
+$$
+```{r setup, include=FALSE}
+
+
+#part a
+#the straight red line is the standard normal distribution, each black dot represents daily stock returns. More the black dots are closer to the straight red line, it'll be following normal distribution. #It looks like leptokurtic so fat tails seem evident and both ends deviated away from the line.
+sprintf("The normal quantile plot of daily stocks return in 2010 seems to follow a normal distribution with few outliers on each side but we can't be sure because it also seems like the normal quantile plot has fat tails .")
+
+#part b
+sprintf("As we can see in the histogram(that seems to follows normal distribution) displayed in the question description,AS we move towards the tails, we observe less number of counts. So if we use more categories to separate very high or low returns, we might get expected count to be less than 5. We are trying to avoid that by grouping ..... . We want to follow the rule of five i.e. sample size condition that the sample size must be large enough so that the expected value for each cell must be 5 or more. ")
+
+#part c - performing goodness of fit test
+
+#null hypothesis : the returns follow a normal distribution
+#alt hypothesis : the returns do not follow normal distribution
+observed_f <- c(18,19,56,128,178,66,23,16) #observed frequencies
+s = sum(observed_f)
+expected_f <- c(10.02,31.24,76.16,121.42,126.61,86.37,38.53,13.66) #expected freq
+ep = expected_f/s
+sum(ep) #1.0002
+#since we assumed that the number of daily stock returns follows a normal distribution, the sum of expected probabilities should be one. 
+
+#subs 0.01 from any of the expected frequencies
+expected_F <- c(10.01,31.24,76.16,121.42,126.61,86.37,38.53,13.66)
+expectedprob <- expected_F/s;
+sum(expectedprob) #1
+
+#goodness of fit test
+chisq.test(x = observed_f,p = expectedprob)
+#test statistic = 49.19
+
+#but since we did two estimations i.e for mean and standard deviation
+#therefore, df = 7-2 = 5
+pchisq(49.19,5,lower.tail = FALSE)
+#p>0.05 
+#reject null
+#- the returns does not follow a normal distribution
+sprintf("Since p value is greater than 0.05, we reject null hypothesis, hence, stock returns don't follow a normal distribution")
+
+#part d
+sprintf("the results of the chi square test does not agree with the normal quantile plot.")
+
+#part e 
+sprintf(" A normal QQ plot is a descriptive technique, it gives us an idea about the distribution and if we have outliers.The purpose of Q Q plots is to find out if two sets of data come from the same distribution. Advantage of chi square test - when we have categorical data such as range(in this case), we dont have individual values for random variable X so we cannot directly check for normality with Anderson Darling, since we have range i.e. catergorical variable, chi square test for normality helps us to check for normality in such cases. Moreover, it gives us a p value which gives us statistical evidence to support our claim")
+
+
+
+```
+#question 2
+The data set provided on the CSV file Stock Market summarizes the number of
+days the stock market went up or down during each trading day of 2018.
+a) Use an appropriate statistical test to determine if these data indicate that
+trading on some days is better or worse (more or less likely to earn positive
+returns) than any other.
+b) How does the test used in (a) differ from comparing the proportion positive
+for each day with 0.5?
+c) These data only indicate the direction of the market. How does that limit
+the conclusions we might draw?
+
+
+
+$$ H_0: Stock\ market\ direction\ and\ day\ of\ the\ week\ are\ independent\\
+H_1: Stock\ market\ direction\ and\ day\ of\ the\ week\ are\ dependent $$
+
+
+```{r cars}
+
+r <-  read.csv("Stock Market.csv")
+#null : does not depend // market direction and week days are independent
+#alt: depends// market direction and week days are dependent
+number_of_days = c(rep("Down",41), rep("Down",42), rep("Down",39), rep("Down", 37), rep("Down", 45),
+                   rep("Up", 59),rep("Up", 55), rep("Up", 52), rep("Up",57), rep("Up",52))
+
+days_per_week = c(rep("Monday",41), rep("Tuesday",42), rep("Wednesday",39), rep("Thursday", 37), rep("Friday", 45),
+                  rep("Monday", 59),rep("Tuesday", 55), rep("Wednesday", 52), rep("Thursday",57), rep("Friday",52))
+
+dataset = data.frame(direction = number_of_days, days_of_week = days_per_week) #contingency table 
+
+chisq.test(dataset$direction, dataset$days_of_week, correct = FALSE)
+#trading on any day is equal.
+mosaicplot(~ days_of_week + direction, data = dataset, 
+           main = "Mosaic Plot", xlab = "week day", ylab = "direction",
+           color = c(4, 2))
+sprintf("the p value is more than 0.05 hence we fail to reject the null hypothesis. Therefore, we conclude that market direction and days of the week are independent.")
+
+#part b
+ sprintf(" We will have to do one sample proportion test for each day of the week, where success would be when the market went up, and failure would be when market went down. We will not be able to conclude all together the relation between market direction and week days, however we'll be able to conclude for each day of the week separately , for that we'' have to do 5 proportion tests. Testing the proportion only determines whether a given model for the parameter fits the data. On the other hand, The chi-squared test is used to determine the overall relation whether the market direction is dependent or independent of the days of the week, we won't have to run the chi square test for each day of the week separately.")
+
+#partc
+ sprintf(" These data only indicate the direction of the market. It does not tell anything about the magnitude, we don't know by how much the market went up and we don't know by how much the market went down. We won't be able to predict anything related to that.")
+
+```
+#question 3
+$$ H_0:  \ P_{lessthanHS} = 0.123 , P_{HS} =0.296,  P_{college} = 0.194 , P_{grad} = 0.387\\
+H_1: Atleast\ one\ proportion\ is\ different\ from\ specified\ above $$
+```{r pressure, echo=FALSE}
+
+#goodness of fit
+r <-  read.csv("GSS2014.csv")
+table(r$DEGREE)
+r[r$DEGREE==4,]= 3 
+r$DEGREE
+t <- table(r$DEGREE)
+addmargins(t)
+o <- c(330,1269,186,753)
+e <- c(0.123,0.296,0.194,0.387)
+chisq.test(x=o,p = e)
+
+sprintf("since the p value is smaller than 0.05, we can reject the null hypothesis. Therefore, we conclude that General social survey in 2014 overrepresented at least one
+        education category")
+  
+```
+#4
+Over the past few years, immigration was a hot-button issue in American politics. One question that arises is: Are immigrants’ educational attainments
+(DEGREE) different from those born in the United States? Use the General
+Social Survey data provided on the CSV file GSS2014 to conduct a statistical
+test to answer the question. The document General Social Survey List of Variables contains the description of all the variables in the GSS data set. Choose
+whichever variables are relevant to answering the question.
+
+
+
+$$ H_0: Education\ levels\ and \ immigrant\ status/birth place \ are\ independent\\
+H_1: Education\ levels\ and \ immigrant\ status/birth place \ are\ dependent $$
+```{r}
+
+#test for independence 
+
+#null hypothesis: educational attainments and birthplace are independent
+#alter: educational attainments and birthplace are dependent
+r <-  read.csv("GSS2014.csv")
+
+r$BORN
+r$DEGREE
+
+chisq.test(r$BORN, r$DEGREE,correct = FALSE)
+sprintf("Since p value is smaller than 0.05, we reject null hypothesis, therefore, educational attainments and birthplace/ immigrant status are dependent on each other.")
+```
+
