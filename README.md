@@ -24,4 +24,5 @@ b) The test used in (a) compares the observed frequencies of positive returns wi
 c) The data only indicate the direction of the market, and do not provide information about the magnitude of the returns or the volatility of the market. This limits the conclusions we can draw from the analysis.
 
 Question 4
+
 An appropriate statistical test, such as a two-sample t-test or a chi-squared test, can be used to determine if immigrants' educational attainments differ from those born in the United States. The relevant variables from the GSS2014 data set can be chosen to conduct the analysis.
